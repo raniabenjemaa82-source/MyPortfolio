@@ -676,7 +676,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
               vertical: 8,
             ),
             child: Text(
-              'Informations sur la Tunisie (API REST)',
+              'Informations du projet GitHub (API REST)',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

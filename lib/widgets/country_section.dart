@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
-import '../models/country_model.dart';
+
+import '../models/github_repo_model.dart';
 import '../services/api_service.dart';
 
 class CountrySection extends StatefulWidget {
@@ -13,17 +14,17 @@ class CountrySection extends StatefulWidget {
 class _CountrySectionState extends State<CountrySection> {
   static const Color primaryColor = Color(0xFF315C81);
 
-  late Future<CountryModel> countryFuture;
+  late Future<GitHubRepoModel> repositoryFuture;
 
   @override
   void initState() {
     super.initState();
-    countryFuture = ApiService.getTunisia();
+    repositoryFuture = ApiService.getRepository();
   }
 
   void retryLoading() {
     setState(() {
-      countryFuture = ApiService.getTunisia();
+      repositoryFuture = ApiService.getRepository();
     });
   }
 
@@ -42,11 +43,11 @@ class _CountrySectionState extends State<CountrySection> {
           children: [
             const Row(
               children: [
-                Icon(Icons.public, color: primaryColor),
+                Icon(Icons.code, color: primaryColor),
                 SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Informations du pays',
+                    'Informations du projet GitHub',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
@@ -57,8 +58,8 @@ class _CountrySectionState extends State<CountrySection> {
               ],
             ),
             const Divider(height: 22),
-            FutureBuilder<CountryModel>(
-              future: countryFuture,
+            FutureBuilder<GitHubRepoModel>(
+              future: repositoryFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState ==
                     ConnectionState.waiting) {
@@ -74,7 +75,7 @@ class _CountrySectionState extends State<CountrySection> {
                   return Column(
                     children: [
                       const Text(
-                        'Impossible de charger les données.',
+                        'Impossible de charger les données GitHub.',
                       ),
                       const SizedBox(height: 10),
                       ElevatedButton.icon(
@@ -86,25 +87,40 @@ class _CountrySectionState extends State<CountrySection> {
                   );
                 }
 
-                final country = snapshot.data!;
+                final repository = snapshot.data!;
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Center(
-                      child: Text(
-                        '🇹🇳',
-                        style: TextStyle(fontSize: 55),
+                      child: Icon(
+                        Icons.code,
+                        size: 55,
+                        color: primaryColor,
                       ),
                     ),
                     const SizedBox(height: 15),
-                    _infoRow('Pays', country.name),
-                    _infoRow('Capitale', country.capital),
-                    _infoRow('Code ISO', country.code),
-                    _infoRow('Région', country.region),
+                    _infoRow('Projet', repository.name),
+                    _infoRow('Repository', repository.fullName),
                     _infoRow(
-                      'Niveau de revenu',
-                      country.incomeLevel,
+                      'Description',
+                      repository.description,
+                    ),
+                    _infoRow(
+                      'Langage',
+                      repository.language,
+                    ),
+                    _infoRow(
+                      'Stars',
+                      repository.stars.toString(),
+                    ),
+                    _infoRow(
+                      'Forks',
+                      repository.forks.toString(),
+                    ),
+                    _infoRow(
+                      'Lien GitHub',
+                      repository.url,
                     ),
                   ],
                 );
@@ -133,7 +149,7 @@ class _CountrySectionState extends State<CountrySection> {
             ),
           ),
           Expanded(
-            child: Text(value),
+            child: SelectableText(value),
           ),
         ],
       ),

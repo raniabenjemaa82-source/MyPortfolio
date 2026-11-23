@@ -1,36 +1,45 @@
 
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
-import '../models/country_model.dart';
+
+import '../models/github_repo_model.dart';
 
 class ApiService {
   static const String apiUrl =
-      'https://api.worldbank.org/v2/country/TUN?format=json';
+      'https://api.github.com/repos/raniabenjemaa82-source/MyPortfolio';
 
-  static Future<CountryModel> getTunisia() async {
-    final response = await http.get(
-      Uri.parse(apiUrl),
-    );
+  static Future<GitHubRepoModel> getRepository() async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse(apiUrl),
+            headers: {
+              'Accept': 'application/vnd.github+json',
+              'X-GitHub-Api-Version': '2022-11-28',
+            },
+          )
+          .timeout(const Duration(seconds: 20));
 
-    if (response.statusCode == 200) {
-      final dynamic data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final dynamic data = jsonDecode(response.body);
 
-      if (data is List &&
-          data.length > 1 &&
-          data[1] is List &&
-          (data[1] as List).isNotEmpty) {
-        final countryData = data[1][0];
+        if (data is Map<String, dynamic>) {
+          return GitHubRepoModel.fromJson(data);
+        }
 
-        return CountryModel.fromJson(
-          countryData as Map<String, dynamic>,
-        );
+        throw Exception('Format des données invalide');
       }
 
-      throw Exception('Aucune donnée disponible pour la Tunisie');
-    } else {
+      if (response.statusCode == 404) {
+        throw Exception('Repository introuvable');
+      }
+
       throw Exception(
-        'Erreur API : ${response.statusCode}',
+        'Erreur API GitHub : ${response.statusCode}',
       );
+    } catch (e) {
+      throw Exception('Impossible de charger GitHub : $e');
     }
   }
 }
